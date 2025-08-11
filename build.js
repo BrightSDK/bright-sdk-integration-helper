@@ -30,6 +30,7 @@ const minorOutputFile = path.join(minorOutputDir, 'brd_api.helper.min.js');
 const masterOutputFile = path.join(masterOutputDir, 'brd_api.helper.min.js');
 
 const rootVersionedFile = path.join(releasesRootDir, `brd_api.helper-${fullVersion}.min.js`);
+const rootLatestFile = path.join(releasesRootDir, `brd_api.helper-latest.min.js`);
 
 // Ensure the output directories exist
 fs.mkdirSync(minorOutputDir, { recursive: true });
@@ -58,15 +59,17 @@ const sourceCode = fs.readFileSync(inputFile, 'utf8');
         fs.writeFileSync(minorOutputFile, result.code, 'utf8');
         fs.writeFileSync(masterOutputFile, result.code, 'utf8');
 
-        // Write the single versioned file to releases root
+        // Write the versioned and latest files to releases root
         fs.writeFileSync(rootVersionedFile, result.code, 'utf8');
+        fs.writeFileSync(rootLatestFile, result.code, 'utf8');
 
         console.log(`✅ Build completed successfully!`);
         console.log(`📁 Minor version (v${minorVersion}): ${minorOutputDir}`);
         console.log(`📁 Master version (v${masterVersion}): ${masterOutputDir}`);
         console.log(`📦 Files created:`);
         console.log(`   - brd_api.helper.min.js (in each version folder)`);
-        console.log(`   - releases/brd_api.helper-${fullVersion}.min.js (single versioned file)`);    } catch (err) {
+        console.log(`   - releases/brd_api.helper-${fullVersion}.min.js (specific version)`);
+        console.log(`   - releases/brd_api.helper-latest.min.js (latest version)`);    } catch (err) {
         console.error('❌ Build failed:', err);
         process.exit(1);
     }
