@@ -1,0 +1,21 @@
+{
+  "name": "bright-sdk-integration-helper",
+  "version": "1.0.0",
+  "description": "BrightSDK Integration Helper",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "node build.js"
+  },
+  "author": "Vladislav S",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "jsdom": "^26.1.0",
+    "terser": "^5.43.1"
+  }
+}
