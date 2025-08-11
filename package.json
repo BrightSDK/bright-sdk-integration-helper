@@ -13,6 +13,7 @@
   "author": "Vladislav S",
   "license": "ISC",
   "devDependencies": {
+    "@bright-sdk/tool-release-manager": "https://brightsdk.github.io/packages/bright-sdk-tool-release-manager/latest.tgz",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
