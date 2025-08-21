@@ -303,11 +303,3 @@ All callbacks receive appropriate parameters:
 2. Check browser console for detailed logs
 3. Verify all required scripts are loaded
 4. Test with the mock implementation first
-
-## Examples
-
-See the `examples/` directory for complete integration examples:
-- Basic web integration
-- Tizen app integration
-- Custom consent dialog
-- Testing setup
