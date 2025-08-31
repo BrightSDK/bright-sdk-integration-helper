@@ -20,22 +20,6 @@
         }
     };
     var onceStatusChangeCallbacks = [];
-    var tizenServiceName = 'Service';
-    var start_tizen_service = function() {
-        return new Promise(function(resolve, reject) {
-            var PICK = 'http://tizen.org/appcontrol/operation/pick';
-            var pkg_id = tizen.application.getCurrentApplication().appInfo.packageId;
-            var service_id = pkg_id + '.' + tizenServiceName;
-            var app_control_data = new tizen.ApplicationControlData('caller', ['ForegroundApp']);
-            var app_control = new tizen.ApplicationControl(PICK, null, null, null, [app_control_data]);
-            return BrightSDK.getBrightApi(false).then(function(brd_api) {
-                if (brd_api.set_alarm) {
-                    brd_api.set_alarm(service_id);
-                }
-                tizen.application.launchAppControl(app_control, service_id, resolve, reject);
-            });
-        });
-    };
     var inited = false;
     var dialog;
     var simpleOptOut = false;
@@ -44,59 +28,56 @@
             debug = settings.debug;
             verbose = settings.debug || settings.verbose;
             simpleOptOut = settings.simple_opt_out;
-            tizenServiceName = settings.tizen_service_name || tizenServiceName;
-            return BrightSDK.startService().then(function() {
-                return new Promise(function(resolve, reject) {
-                    BrightSDK.getBrightApi(false).then(function(brd_api) {
-                        print('init with settings: %o', settings);
-                        var on_status_change = settings.on_status_change;
-                        var skip_consent = settings.skip_consent;
-                        if (settings.external_consent_options)
-                        {
-                            BrightSDK.createDialog(settings);
-                            settings.external_consent_options = undefined;
-                            settings.skip_consent = true; // initial display is handled by helper
-                            settings.simple_opt_out = undefined; // handled by dialog
-                        }
-                        settings.on_status_change = function() {
-                            try {
-                                var status = brd_api.get_status();
-                                var value = status
-                                    ? status.value
-                                        ? status.value.consent : status.consent
-                                    : null;
-                                BrightSDK.onStatusChangeFn(value);
-                                for (var i = 0; i < onceStatusChangeCallbacks.length; i++) {
-                                    onceStatusChangeCallbacks[i](value);
-                                }
-                                onceStatusChangeCallbacks = [];
-                                if (on_status_change) {
-                                    on_status_change(value);
-                                }
-                            } catch (e) {
-                                print_err(e);
-                            }
-                        };
+            return new Promise(function(resolve, reject) {
+                BrightSDK.getBrightApi(false).then(function(brd_api) {
+                    print('init with settings: %o', settings);
+                    var on_status_change = settings.on_status_change;
+                    var skip_consent = settings.skip_consent;
+                    if (settings.external_consent_options)
+                    {
+                        BrightSDK.createDialog(settings);
+                        settings.external_consent_options = undefined;
+                        settings.skip_consent = true; // initial display is handled by helper
+                        settings.simple_opt_out = undefined; // handled by dialog
+                    }
+                    settings.on_status_change = function() {
                         try {
-                            brd_api.init(settings, {
-                                on_failure: function(message) {
-                                    print_err('init failure. Error: ', message);
-                                    reject(new Error(message));
-                                },
-                                on_success: function() {
-                                    print('init success');
-                                    inited = true;
-                                    resolve();
-                                    if (!skip_consent && !status)
-                                        BrightSDK.showConsent();
-                                    BrightSDK.showNotification(10000);
-                                },
-                            });
+                            var status = brd_api.get_status();
+                            var value = status
+                                ? status.value
+                                    ? status.value.consent : status.consent
+                                : null;
+                            BrightSDK.onStatusChangeFn(value);
+                            for (var i = 0; i < onceStatusChangeCallbacks.length; i++) {
+                                onceStatusChangeCallbacks[i](value);
+                            }
+                            onceStatusChangeCallbacks = [];
+                            if (on_status_change) {
+                                on_status_change(value);
+                            }
                         } catch (e) {
                             print_err(e);
-                            reject();
                         }
-                    });
+                    };
+                    try {
+                        brd_api.init(settings, {
+                            on_failure: function(message) {
+                                print_err('init failure. Error: ', message);
+                                reject(new Error(message));
+                            },
+                            on_success: function() {
+                                print('init success');
+                                inited = true;
+                                resolve();
+                                if (!skip_consent && !status)
+                                    BrightSDK.showConsent();
+                                BrightSDK.showNotification(10000);
+                            },
+                        });
+                    } catch (e) {
+                        print_err(e);
+                        reject();
+                    }
                 });
             });
         },
@@ -261,13 +242,6 @@
         },
         isEnabled: function() {
             return status == 'enabled';
-        },
-        startService: function() {
-            if (window.tizen) {
-                print('detected OS: Tizen');
-                return start_tizen_service();
-            }
-            return Promise.resolve();
         },
         showNotification: function(ms) {
             if (dialog)

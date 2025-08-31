@@ -1,6 +1,6 @@
 {
   "package": "bright-sdk-integration-helper",
-  "generatedAt": "2025-08-31T11:52:55.023Z",
+  "generatedAt": "2025-08-31T11:52:55.025Z",
   "files": [
     {
       "path": "brd_api.helper.min.js",
@@ -8,7 +8,6 @@
       "type": "js"
     }
   ],
-  "type": "major",
-  "version": "1",
-  "fullVersion": "1.0.1"
+  "type": "specific",
+  "version": "1.0.1"
 }
