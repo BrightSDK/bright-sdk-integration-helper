@@ -168,6 +168,7 @@
             if (dialog) // avoid creating multiple dialogs
                 return;
             var [targetId, options] = settings.external_consent_options;
+            options.language = settings.lang;
             if (simpleOptOut)
                 options.Out = true;
             var onShow = options.onShow;

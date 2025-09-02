@@ -61,6 +61,7 @@ describe("BrightSDK", () => {
     test("creates dialog with external consent options", async () => {
         const settings = {
             debug: true,
+            lang: 'fr',
             external_consent_options: [
                 'consent-dialog',
                 {
@@ -74,6 +75,8 @@ describe("BrightSDK", () => {
 
         await BrightSDK.init(settings);
         expect(global.ConsentModule.create).toHaveBeenCalled();
+        const optionsArg = global.ConsentModule.create.mock.calls[0][1];
+        expect(optionsArg.language).toBe('fr');
     });
 
     test("handles simple opt out", async () => {
