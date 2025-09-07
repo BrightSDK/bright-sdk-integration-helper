@@ -8,6 +8,6 @@
       "type": "js"
     }
   ],
-  "type": "latest",
+  "type": "specific",
   "version": "1.0.3"
 }
