@@ -90,4 +90,65 @@ describe("BrightSDK", () => {
         // Should resolve without calling confirm since simple_opt_out is true
         expect(global.confirm).not.toHaveBeenCalled();
     });
+
+    test('waitForStatusChange resolves', async () => {
+        // Should resolve even when there is no pending status change promise
+        await expect(BrightSDK.waitForStatusChange()).resolves.toBeFalsy();
+    });
+
+    test('getBrightApi retries until brd_api becomes available', async () => {
+        // Temporarily remove global brd_api to force retry logic
+        const original_brd_api = global.window.brd_api;
+        delete global.window.brd_api;
+
+        // Start getBrightApi with small intervalMs and requireInit=false so it
+        // retries only because brd_api is missing.
+        const p = BrightSDK.getBrightApi(false, 1);
+
+        // After a short delay restore brd_api so the retry can succeed
+        await new Promise(resolve => setTimeout(resolve, 10));
+        global.window.brd_api = original_brd_api;
+
+        const result = await p;
+        expect(result).toHaveProperty('get_status');
+    });
+
+    test('registers and unregisters simple opt out keyboard handler', async () => {
+        // Reset module to get a fresh dialog state so createDialog runs
+        jest.resetModules();
+        // Reload mock and helper to recreate module-level state
+        require('../src/brd_api.mock.js');
+        require('../src/brd_api.helper.js');
+        BrightSDK = global.window.BrightSDK;
+
+        // Spy on add/remove event listener calls
+        const addSpy = jest.spyOn(document, 'addEventListener');
+        const removeSpy = jest.spyOn(document, 'removeEventListener');
+
+        const settings = {
+            debug: true,
+            lang: 'en',
+            external_consent_options: [
+                'consent-dialog',
+                {
+                    simpleOptOut: true,
+                    onAccept: jest.fn(),
+                    onDecline: jest.fn(),
+                    onShow: jest.fn(),
+                    onClose: jest.fn()
+                }
+            ]
+        };
+
+        await BrightSDK.init(settings);
+        expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function), {capture: true});
+
+        const optionsArg = global.ConsentModule.create.mock.calls[global.ConsentModule.create.mock.calls.length-1][1];
+        // Simulate showing the dialog which should unregister the keyboard handler
+        optionsArg.onShow();
+        expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function), {capture: true});
+
+        addSpy.mockRestore();
+        removeSpy.mockRestore();
+    });
 });
