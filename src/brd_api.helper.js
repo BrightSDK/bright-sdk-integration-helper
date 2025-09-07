@@ -19,6 +19,7 @@
             console.error.apply(console, arguments);
         }
     };
+    var status_change_promise;
     var onceStatusChangeCallbacks = [];
     var inited = false;
     var dialog;
@@ -84,6 +85,12 @@
         isInited: function() {
             return inited;
         },
+        waitForStatusChange: function() {
+            return Promise.resolve().then(function() {
+                if (status_change_promise)
+                    return status_change_promise;
+            });
+        },
         enable: function(skipConsent) {
             return new Promise(function(resolve, reject) {
                 return BrightSDK.getBrightApi().then(function(brd_api) {
@@ -108,7 +115,8 @@
         },
         disable: function() {
             status = 'disabled';
-            return new Promise(function(resolve, reject) {
+            return BrightSDK.waitForStatusChange().then(function() {
+                return status_change_promise = new Promise(function(resolve, reject) {
                 BrightSDK.onceStatusChange(resolve, 'disableResolve', true);
                 BrightSDK.getBrightApi().then(function(brd_api) {
                     brd_api.opt_out({
@@ -120,6 +128,7 @@
                         on_success: function() {
                             print('opt_out success');
                         },
+                        });
                     });
                 });
             });
