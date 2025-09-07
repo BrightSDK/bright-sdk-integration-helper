@@ -176,7 +176,8 @@
             }
             if (dialog) // avoid creating multiple dialogs
                 return;
-            var [targetId, options] = settings.external_consent_options;
+            var targetId = settings.external_consent_options[0];
+            var options = settings.external_consent_options[1];
             options.language = settings.lang;
             if (simpleOptOut)
                 options.Out = true;
@@ -199,8 +200,18 @@
                 document.addEventListener(
                     'keydown',
                     simpleOptOutKeyboardHandler,
-                    {capture: true, once: true}
+                    {capture: true}
                 );
+            }
+            function unregisterSimpleOptOutKeyboardHandler() {
+                if (!simpleOptOutKeyboardHandler)
+                    return;
+                document.removeEventListener(
+                    'keydown',
+                    simpleOptOutKeyboardHandler,
+                    {capture: true}
+                );
+                simpleOptOutKeyboardHandler = undefined;
             }
             options.onAccept = function () {
                 BrightSDK.enable(true);
@@ -213,6 +224,7 @@
                     onDecline();
             };
             options.onShow = function() {
+                unregisterSimpleOptOutKeyboardHandler();
                 BrightSDK.reportConsentShown();
                 if (onShow)
                     onShow();
