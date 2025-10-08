@@ -271,7 +271,8 @@
         },
         reportConsentShown: function() {
             return BrightSDK.getBrightApi().then(function(brd_api) {
-                brd_api.consent_shown();
+                if (brd_api.consent_shown)
+                    brd_api.consent_shown();
             });
         },
         getBrightApi: function(requireInit, intervalMs) {

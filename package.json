@@ -1,6 +1,6 @@
 {
   "name": "bright-sdk-integration-helper",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "BrightSDK Integration Helper",
   "main": "index.js",
   "directories": {
